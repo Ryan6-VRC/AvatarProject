@@ -1,0 +1,15 @@
+#!/bin/sh
+# Regenerate the Assets/ structure snapshot and include it in this commit.
+# Warn, don't block: a snapshot failure must never gate committing real work.
+top="$(git rev-parse --show-toplevel)"
+engine="$top/../tools/dump_asset_structure.py"
+if command -v python >/dev/null 2>&1 && [ -f "$engine" ]; then
+  if python "$engine" "$(basename "$top")"; then
+    git add STRUCTURE.md || echo "pre-commit: could not stage STRUCTURE.md; continuing" >&2
+  else
+    echo "pre-commit: structure snapshot failed; committing without refresh" >&2
+  fi
+else
+  echo "pre-commit: python or engine missing; skipping structure snapshot" >&2
+fi
+exit 0   # warn, never block: a snapshot problem must not gate the commit

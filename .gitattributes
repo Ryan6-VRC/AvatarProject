@@ -1,0 +1,33 @@
+# ---------------------------------------------------------------------------
+# Unity + VRChat .gitattributes
+# Goal: text/YAML stays diffable & smart-merged. Large art/source binaries are gitignored and kept
+# under an external backup, NOT version-controlled — see .gitignore. LFS is retained only for the
+# immutable VPM resolver bootstrap DLLs. (LFS is never applied to Unity YAML.)
+# ---------------------------------------------------------------------------
+
+# Default: let Git decide, normalize line endings for text.
+* text=auto
+
+# --- Unity YAML assets: treat as text, use UnityYAMLMerge smart merge ---
+# Requires once per machine:
+#   git config --global merge.unityyamlmerge.driver \
+#     '"C:/Program Files/Unity/Hub/Editor/2022.3.22f1/Editor/Data/Tools/UnityYAMLMerge.exe" merge -p %O %B %A %A'
+*.unity            merge=unityyamlmerge eol=lf
+*.prefab           merge=unityyamlmerge eol=lf
+*.asset            merge=unityyamlmerge eol=lf
+*.mat              merge=unityyamlmerge eol=lf
+*.anim             merge=unityyamlmerge eol=lf
+*.controller       merge=unityyamlmerge eol=lf
+*.overrideController merge=unityyamlmerge eol=lf
+*.physicMaterial   merge=unityyamlmerge eol=lf
+*.meta             merge=unityyamlmerge eol=lf
+*.cs               text diff=csharp eol=lf
+*.shader           text eol=lf
+*.json             text eol=lf
+
+# Generated Assets/ structure snapshot — keep LF so --check doesn't false-flag stale on autocrlf machines.
+STRUCTURE.md text eol=lf
+
+# --- Git LFS: retained only for the immutable VPM resolver bootstrap DLLs ---
+# All large art/source binaries (fbx/blend/psd/png/audio/…) are gitignored, not LFS-tracked.
+*.dll   filter=lfs diff=lfs merge=lfs -text
